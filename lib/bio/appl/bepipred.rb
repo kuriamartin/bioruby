@@ -38,22 +38,53 @@ class Bepipred
   autoload :Report, 'bio/appl/bepipred/report'
   
   # Creates a new Bepipred execution wrapper object
-  def initialize(program='bepipred',opt=[])
+  def initialize(program='bepipred',score_threshold=0.35,file_name)
     @program = program
-    @options = opt
+    @score_threshold = score_threshold
+    @file_name = file_name
   end
   
-  # name of the program (usually 'bepipred' in UNIX/Linux)
+  # name of the program ('bepipred' in UNIX/Linux)
   attr_accessor :program
 
   # options
-  attr_accessor :options
+  attr_accessor :score_threshold
   
+  # return the names of the input sequences
+  attr_reader :sequence_names
+  
+  def sequence_names(file)
+    sequence_names = []
+    Bio::FlatFile.auto(@file) do |f|
+      f.each do |entry|
+        sequence_names << entry.definition
+      end
+    end
+    sequence_names
+  end
+  
+  # TODO create a list of query sequences
+  
+  
+  #TODO create a commandline as an array cmd
+  def make_command
+    cmd = [@program,"-t #{@score_threshold}",@file_name ]
+  end
+  
+  #query the file 
+  def query(file_name)
+    cmd = make_command
+    exec_local(cmd)
+  end  
+  
+  # TODO create a parser class for the ouput
+  # parse_results
   
  private
  #executes bepipred when called localy
- def exec_local
-  
+ #The input is a file name or a path to the file containing protein sequences in fasta format
+ def exec_local(cmd)
+   Bio::Command.query_command(cmd)
  end
     
 end  
