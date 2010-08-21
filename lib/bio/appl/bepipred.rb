@@ -83,6 +83,8 @@ class Bepipred
  private
  #executes bepipred when called localy
  #The input is a file name or a path to the file containing protein sequences in fasta format
+ #This method does not work
+ # There could be a bug in the way the cmd aregument is created.
  def exec_local(cmd)
    Bio::Command.query_command(cmd)
  end
