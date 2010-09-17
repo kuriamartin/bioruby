@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 #
 # = bio/appl/bepipred.rb - Bepipred wrapper
 # 
@@ -16,8 +17,9 @@
 #   Jens Erik Pontoppidan Larsen, Ole Lund and Morten Nielsen
 #   Immunome Research 2:2, 2006.
 
-require 'bio/command'
-require 'shellwords'
+
+require '/home/martin/bioruby/lib/bio/command'
+#require 'shellwords'
 
 module Bio
 
@@ -34,16 +36,22 @@ module Bio
   #   report = factory.query
   #   report.class # => Bio::Bepipred::Report
   #
+
 class Bepipred
-  autoload :Report, 'bio/appl/bepipred/report'
+  autoload :Report, '/home/martin/bioruby/lib/bio/appl/bepipred/report'
   
   # Creates a new Bepipred execution wrapper object
-  def initialize(program='bepipred',score_threshold=0.35,file_name)
+  #def initialize(program='bepipred',score_threshold=0.35,file_name)
+  def initialize(program = '/usr/local/bepipred-1.0b/bepipred',score_threshold=0.35,file_name='/usr/local/bepipred-1.0b/test/Pellequer.fsa',options = [])
+    #@program is a instance variable, and is available to all the methods of the class Bepipred. 
+    #As you can see it’s used by methods make_command and query
     @program = program
     @score_threshold = score_threshold
     @file_name = file_name
+    @options = [ '-h', '-k', '-s', 't #', '-V'] # switches
+    @output  = ''
   end
-  
+
   # name of the program ('bepipred' in UNIX/Linux)
   attr_accessor :program
 
@@ -64,13 +72,33 @@ class Bepipred
   end
   
   # TODO create a list of query sequences
+
   
-  
-  #TODO create a commandline as an array cmd
+
+print "\n\n111-in reached heare\n"
+
+  # Executes the Bepipred search and returns the report 
+  # (Bio::Bepipred::Report object).
   def make_command
-    cmd = [@program,"-t #{@score_threshold}",@file_name ]
+    cmd = [@program," -t #{@score_threshold} ",@file_name]
+
+    report = nil
+
+    @output = Bio::Command.query_command(cmd,nil)
+    #report = Bio::Command.query_command(cmd)
+    report = parse_result(@output)
+
+    return report
+
   end
   
+
+  def parse_result(data)
+    Report.new(data)
+  end
+  
+
+
   #query the file 
   def query(file_name)
     cmd = make_command
@@ -79,15 +107,21 @@ class Bepipred
   
   # TODO create a parser class for the ouput
   # parse_results
-  
- private
+
+ #private
  #executes bepipred when called localy
  #The input is a file name or a path to the file containing protein sequences in fasta format
  #This method does not work
  # There could be a bug in the way the cmd aregument is created.
- def exec_local(cmd)
-   Bio::Command.query_command(cmd)
- end
-    
-end  
+ #def exec_local(cmd)
+  # Bio::Command.query_command(cmd)
+ #end
+
+
+
 end
+end 
+g = Bio::Bepipred.new()
+
+#execute 
+g.make_command
